@@ -1,0 +1,81 @@
+﻿# ─────────────────────────────────────────────
+# Stage 1 — Build the application
+# ─────────────────────────────────────────────
+
+# Use official Microsoft .NET Framework SDK image
+# This includes all tools needed to BUILD the app
+FROM mcr.microsoft.com/dotnet/framework/sdk:4.8 AS build
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy all project files into the container
+COPY . .
+
+# Restore NuGet packages (downloads Newtonsoft.Json etc.)
+RUN nuget restore AIChatbot.sln
+
+# Build the project in Release mode
+RUN msbuild AIChatbot.sln /p:Configuration=Release /p:Platform="Any CPU"
+
+# ─────────────────────────────────────────────
+# Stage 2 — Runtime image
+# ─────────────────────────────────────────────
+
+# Use a smaller runtime-only image to run the app
+FROM mcr.microsoft.com/dotnet/framework/runtime:4.8 AS runtime
+
+# Set working directory
+WORKDIR /app
+
+# Copy compiled output from build stage
+COPY --from=build /app/bin/Release/ .
+
+# Command to run the application
+CMD ["AIChatbot.exe"]
+```
+
+5. Press **Ctrl + S** to save
+
+---
+
+## STEP 2 — Verify the Dockerfile Exists
+
+In **Solution Explorer**, you should now see:
+```
+AIChatbot
+  ├── Properties
+  ├── References
+  ├── Dockerfile        ← new file here
+  ├── Form1.cs
+  ├── Form1.Designer.cs
+  └── Program.cs
+```
+
+---
+
+## STEP 3 — Install Docker Desktop
+
+Since Docker needs to be installed to actually run containers:
+
+1. Go to 👉 **https://www.docker.com/products/docker-desktop**
+2. Click **"Download for Windows"**
+3. Run the installer
+4. Restart your PC when asked
+5. After restart, Docker Desktop opens — you'll see a **whale icon** in the taskbar
+
+> ✅ Docker Desktop must be **running** (whale icon visible) before you can use docker commands
+
+---
+
+## STEP 4 — Find Your Project Folder Path
+
+You need to know where your project is saved:
+
+1. In Visual Studio, **right-click** your project name in Solution Explorer
+2. Click **"Open Folder in File Explorer"**
+3. Look at the **address bar** at the top — copy that path
+
+It will look something like:
+```
+C:\Users\Dell\source\repos\AIChatboat
